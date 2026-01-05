@@ -293,24 +293,35 @@ OLLAMA_MODEL=llama3.2
 
 ---
 
-## Performance Tips
+## Using Recipe Features
 
-1. **First Import Slow?** 
-   - First run loads models into memory
-   - Subsequent imports are faster
+### Importing a Recipe
 
-2. **Improve Scraping Speed**
-   - Use standard scraper (fastest)
-   - Ollama is slower but free
-   - Gemini is balanced (needs API key)
+1. Go to `http://localhost:8001`
+2. Paste any recipe URL
+3. Click "Fetch recipe"
+4. Review the extracted data (adjust if needed)
+5. Add categories and save
 
-3. **Reduce Memory Usage**
-   - Switch to smaller Ollama model: `ollama pull tinyllama`
-   - Use only Gemini (no local models)
+### Scaling Recipe Servings
+
+Once a recipe is saved:
+
+1. Click on the recipe to view details
+2. Look for the **Servings** control in the top right
+3. Use **+/−** buttons to adjust or type a number directly
+4. All ingredient amounts update instantly!
+
+**How it works:**
+- Original: 2 servings, 1 cup flour
+- Change to 4 servings → 2 cups flour
+- Change to 1 serving → 1/2 cup flour
+
+Note: Cooking times don't change (only ingredients scale)
 
 ---
 
-## Next Steps
+
 
 1. Import your first recipe!
 2. Configure your preferred AI provider

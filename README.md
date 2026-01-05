@@ -10,6 +10,11 @@ A web application for importing and managing recipes with AI-powered parsing cap
   - Local Ollama models (free, runs locally)
   
 - **Intelligent Fallback System**: Automatically cascades through import methods if one fails
+- **Recipe Scaling**: Adjust servings and automatically scale ingredient amounts
+  - Change servings with +/- buttons or direct input
+  - Ingredient amounts update in real-time
+  - Smart fraction conversion (1/2, 1/4, 3/4, etc.)
+  - Non-numeric ingredients remain unchanged
 - **Recipe Management**: Add, edit, and organize recipes with categories
 - **Responsive Web UI**: Modern, dark-themed interface built with Tailwind CSS
 - **Progress Indicator**: Visual feedback while recipes are being fetched
@@ -124,6 +129,14 @@ To use Ollama locally:
 5. Review and edit the extracted data
 6. Add categories and click "Save recipe"
 
+### Viewing & Scaling Recipes
+
+1. Click on a recipe to view full details
+2. Adjust servings using the +/- buttons or direct input in the top right
+3. All ingredient amounts automatically scale proportionally
+4. Recipe cooking times remain the same (only ingredients scale)
+5. Make edits and save to update the recipe
+
 ### Supported Recipe Sites
 
 The standard web scraper supports 1000+ recipe sites including:
@@ -132,6 +145,18 @@ The standard web scraper supports 1000+ recipe sites including:
 - Serious Eats
 - Simply Recipes
 - And many more (see [recipe-scrapers documentation](https://github.com/hhursev/recipe-scrapers))
+
+### Recipe Scaling Examples
+
+**Original Recipe: 4 servings**
+- 2 cups flour → 1 cup flour (2 servings)
+- 1/2 cup butter → 2 cups butter (8 servings)
+- 1 tablespoon sugar → 1.5 tablespoons sugar (6 servings)
+
+The app automatically:
+- Converts fractions intelligently
+- Rounds to reasonable measurements
+- Preserves non-numeric ingredients ("salt to taste")
 
 ## API Endpoints
 
@@ -221,12 +246,14 @@ python test_ai_providers.py
 
 - [ ] Image upload and management
 - [ ] Recipe sharing via URL
-- [ ] Nutritional information parsing
-- [ ] Shopping list generation
-- [ ] Recipe scaling by servings
+- [ ] Nutritional information parsing and scaling
+- [ ] Shopping list generation from multiple recipes
+- [ ] Enhanced recipe scaling (adjusting cooking times)
 - [ ] Dark/light theme toggle
 - [ ] Export to PDF
 - [ ] Mobile app
+- [ ] Recipe ratings and favorites
+- [ ] Unit conversion preferences (metric/imperial)
 
 ## License
 
