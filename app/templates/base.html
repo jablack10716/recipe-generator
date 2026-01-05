@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title or "Recipe Importer" }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.14/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .glass-card { backdrop-filter: blur(8px); background: rgba(15, 23, 42, 0.65); }
+    .chip { border-radius: 9999px; padding: 0.25rem 0.75rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-100">
+  <div class="min-h-screen flex flex-col">
+    <header class="border-b border-slate-800/70 bg-slate-900/70 sticky top-0 z-10">
+      <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/" class="text-lg font-semibold tracking-tight text-teal-300">Local Recipe Importer</a>
+        <div class="flex gap-3 text-sm">
+          <a href="/" class="text-slate-200 hover:text-white">Import</a>
+          <a href="/recipes" class="text-slate-200 hover:text-white">All recipes</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <div class="max-w-5xl mx-auto px-4 py-10">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="border-t border-slate-800/70 bg-slate-900/60">
+      <div class="max-w-5xl mx-auto px-4 py-4 text-xs text-slate-400">
+        Local-only • Built with FastAPI + SQLite • Responsive for desktop and phone widths
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
