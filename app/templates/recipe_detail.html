@@ -21,10 +21,20 @@
 
       {% if recipe.ingredients %}
         <div>
-          <h2 class="text-lg font-semibold text-white mb-2">Ingredients</h2>
-          <ul class="space-y-2 list-disc list-inside text-slate-200">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Ingredients</h2>
+            <div class="flex items-center gap-3 bg-slate-800/60 border border-slate-700 rounded-lg p-2">
+              <button type="button" id="decreaseServings" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm font-semibold transition">−</button>
+              <div class="text-center min-w-20">
+                <p class="text-xs text-slate-400">Servings</p>
+                <input type="number" id="servingsInput" min="1" value="{{ recipe.servings or 1 }}" class="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-center font-semibold focus:border-teal-400 focus:outline-none">
+              </div>
+              <button type="button" id="increaseServings" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm font-semibold transition">+</button>
+            </div>
+          </div>
+          <ul id="ingredientsList" class="space-y-2 list-disc list-inside text-slate-200">
             {% for item in recipe.ingredients.splitlines() if item %}
-              <li>{{ item }}</li>
+              <li data-original-ingredient="{{ item }}">{{ item }}</li>
             {% endfor %}
           </ul>
         </div>
@@ -69,4 +79,141 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Recipe scaling functionality
+    const originalServings = parseFloat(document.getElementById('servingsInput').value) || 1;
+    const servingsInput = document.getElementById('servingsInput');
+    const decreaseBtn = document.getElementById('decreaseServings');
+    const increaseBtn = document.getElementById('increaseServings');
+    const ingredientsList = document.getElementById('ingredientsList');
+
+    // Parse ingredient string to extract amount, unit, and name
+    function parseIngredient(ingredientStr) {
+      // Match patterns like "2 cups flour" or "1/2 teaspoon salt" or "3 tablespoons butter"
+      const match = ingredientStr.match(/^([0-9\/.\s]+)\s*([a-zA-Z]*(?:\s+[a-zA-Z]+)?)\s+(.+)$/);
+      if (match) {
+        return {
+          amount: match[1].trim(),
+          unit: match[2].trim(),
+          name: match[3].trim()
+        };
+      }
+      return {
+        amount: '',
+        unit: '',
+        name: ingredientStr.trim()
+      };
+    }
+
+    // Convert fraction strings to decimals
+    function fractionToDecimal(fraction) {
+      if (!fraction) return 0;
+      fraction = fraction.trim();
+      
+      if (fraction.includes('/')) {
+        const parts = fraction.split('/');
+        const num = parseFloat(parts[0]);
+        const denom = parseFloat(parts[1]);
+        if (isNaN(num) || isNaN(denom)) return parseFloat(fraction) || 0;
+        return num / denom;
+      }
+      return parseFloat(fraction) || 0;
+    }
+
+    // Convert decimal to readable format
+    function formatAmount(decimal) {
+      if (decimal === 0) return '';
+      
+      // Round to 2 decimal places
+      decimal = Math.round(decimal * 100) / 100;
+      
+      // Common fractions
+      const fractions = {
+        0.125: '1/8',
+        0.25: '1/4',
+        0.33: '1/3',
+        0.375: '3/8',
+        0.5: '1/2',
+        0.66: '2/3',
+        0.625: '5/8',
+        0.75: '3/4',
+        0.875: '7/8'
+      };
+
+      const whole = Math.floor(decimal);
+      const fractional = decimal - whole;
+
+      // Find closest fraction
+      let closestFraction = null;
+      let closestDiff = 0.1;
+      
+      for (const [frac, label] of Object.entries(fractions)) {
+        const diff = Math.abs(parseFloat(frac) - fractional);
+        if (diff < closestDiff) {
+          closestDiff = diff;
+          closestFraction = label;
+        }
+      }
+
+      // Format result
+      if (closestFraction && closestDiff < 0.05) {
+        return whole > 0 ? `${whole} ${closestFraction}` : closestFraction;
+      }
+      
+      return decimal.toString();
+    }
+
+    // Scale ingredient amounts
+    function scaleIngredient(ingredientStr, scaleFactor) {
+      const parsed = parseIngredient(ingredientStr);
+      
+      if (!parsed.amount) {
+        return ingredientStr;
+      }
+
+      const originalAmount = fractionToDecimal(parsed.amount);
+      if (originalAmount === 0) {
+        return ingredientStr;
+      }
+      
+      const newAmount = originalAmount * scaleFactor;
+      const formattedAmount = formatAmount(newAmount);
+
+      return `${formattedAmount} ${parsed.unit} ${parsed.name}`.trim();
+    }
+
+    // Update ingredients display
+    function updateIngredients() {
+      const currentServings = parseFloat(servingsInput.value) || 1;
+      const scaleFactor = currentServings / originalServings;
+
+      if (!ingredientsList) return;
+
+      const ingredients = ingredientsList.querySelectorAll('[data-original-ingredient]');
+      ingredients.forEach(item => {
+        const originalText = item.dataset.originalIngredient;
+        const scaledText = scaleIngredient(originalText, scaleFactor);
+        item.textContent = scaledText;
+      });
+    }
+
+    // Event listeners
+    servingsInput.addEventListener('change', updateIngredients);
+    servingsInput.addEventListener('input', updateIngredients);
+    
+    decreaseBtn.addEventListener('click', () => {
+      const current = parseFloat(servingsInput.value) || 1;
+      if (current > 0.5) {
+        servingsInput.value = Math.round((current - 0.5) * 2) / 2; // Allow 0.5 increments
+        updateIngredients();
+      }
+    });
+    
+    increaseBtn.addEventListener('click', () => {
+      const current = parseFloat(servingsInput.value) || 1;
+      servingsInput.value = Math.round((current + 0.5) * 2) / 2;
+      updateIngredients();
+    });
+  </script>
 {% endblock %}
