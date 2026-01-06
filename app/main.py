@@ -24,15 +24,21 @@ def _serialize_scraped(scraper) -> dict:
         cleaned = [item.strip() for item in items if item and item.strip()]
         return "\n".join(cleaned)
 
+    def _safe_call(func, default=None):
+        try:
+            return func() or default
+        except:
+            return default
+
     return {
-        "title": scraper.title() or "",
+        "title": _safe_call(scraper.title, ""),
         "source_url": scraper.url or "",
-        "ingredients": _join_lines(scraper.ingredients()),
-        "instructions": _join_lines(scraper.instructions_list()),
-        "prep_time_minutes": scraper.prep_time() or None,
-        "cook_time_minutes": scraper.cook_time() or None,
-        "servings": scraper.yields() or "",
-        "image_url": scraper.image() or "",
+        "ingredients": _join_lines(_safe_call(scraper.ingredients, [])),
+        "instructions": _join_lines(_safe_call(scraper.instructions_list, [])),
+        "prep_time_minutes": _safe_call(scraper.prep_time),
+        "cook_time_minutes": _safe_call(scraper.cook_time),
+        "servings": _safe_call(scraper.yields, ""),
+        "image_url": _safe_call(scraper.image, ""),
     }
 
 
@@ -202,11 +208,19 @@ async def create_recipe(
 def list_recipes(
     request: Request,
     category_id: Optional[int] = None,
+    q: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     query = db.query(Recipe).options(joinedload(Recipe.categories)).order_by(Recipe.created_at.desc())
     if category_id:
         query = query.join(RecipeCategory).filter(RecipeCategory.category_id == category_id)
+    if q:
+        search_term = f"%{q}%"
+        query = query.filter(
+            (Recipe.title.ilike(search_term)) |
+            (Recipe.ingredients.ilike(search_term)) |
+            (Recipe.instructions.ilike(search_term))
+        )
     recipes = query.all()
 
     categories = db.query(Category).order_by(Category.name).all()
@@ -218,6 +232,7 @@ def list_recipes(
             "recipes": recipes,
             "categories": categories,
             "selected_category_id": category_id,
+            "search_query": q,
         },
     )
 

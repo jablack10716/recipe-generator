@@ -1,7 +1,7 @@
 from recipe_scrapers import scrape_me
 import requests
 
-url = "https://www.liquor.com/recipes/manhattan-2/"
+url = "https://www.foodnetwork.com/recipes/food-network-kitchen/the-best-carbonara-7260325"
 
 print(f"Testing URL: {url}")
 
